@@ -31,7 +31,7 @@
                 :class="[
                     { 'not-current-month': !isCurrentMonth(row, col)},
                     { 'is-today': isToday(row, col)},
-                    { 'is-selected': isSelected(row, col)}
+                    { 'is-selected': isSelected(row, col) && selected}
                 ]"
                 @click="handleSelect(row, col)"
             >
@@ -52,7 +52,7 @@ export default {
     props: {
         value: {
             type: Date,
-            default: () => new Date()
+            default: () => {}
         },
         isOpen: {
             type: Boolean,
@@ -63,7 +63,8 @@ export default {
         const time = utils.getDatePanel(this.value)
         return {
             weekdays: ['日', '一', '二', '三', '四', '五', '六'],
-            time
+            time,
+            selected: false
         }
     },
     computed: {
@@ -117,7 +118,7 @@ export default {
                 year: y,
                 month: m,
                 day: d
-            } = this.time
+            } = utils.getDatePanel(this.value)
             return year === y && month === m && day === d
         },
         handleSelect (row, col) {
@@ -127,6 +128,7 @@ export default {
             d.setMinutes(minute)
             d.setSeconds(second)
             this.time = utils.getDatePanel(d)
+            this.selected = true
             this.$emit('input', d)
         }
     }
@@ -183,14 +185,14 @@ export default {
                 &.not-current-month {
                     color: #CDD0D4;
                 }
+                &.is-today {
+                    color: #E44444;
+                    background-color: #fff;
+                }
                 &.is-selected {
                     background-color: #E44444;
                     color: #fff;
                     border-radius: 50%;
-                }
-                &.is-today {
-                    color: #E44444;
-                    background-color: #fff;
                 }
             }
         }
