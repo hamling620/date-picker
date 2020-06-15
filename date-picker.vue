@@ -2,6 +2,37 @@
   <div class="date-picker-wrapper" v-click-outside>
       <input type="text" :value="formatDate" :class="{focus: isOpend}">
       <div class="panel" v-if="isOpend">
+          <div class="date-picker-select">
+              <div class="select-date">
+                  <input type="text" :value="formatDate">
+              </div>
+              <div class="select-time">
+                  <input type="text" :value="formatTime">
+                  <div class="select-time-panel">
+                      <div class="hour-list">
+                          <ul>
+                              <li v-for="item in 24" :key="item">
+                                  {{ item - 1 | format }}
+                              </li>
+                          </ul>
+                      </div>
+                      <div class="minute-list">
+                          <ul>
+                              <li v-for="item in 60" :key="item">
+                                  {{ item - 1 | format }}
+                              </li>
+                          </ul>
+                      </div>
+                      <div class="second-list">
+                          <ul>
+                              <li v-for="item in 60" :key="item">
+                                  {{ item - 1 | format }}
+                              </li>
+                          </ul>
+                      </div>
+                  </div>
+              </div>
+          </div>
           <div class="panel-header">
               <span @click="changeYear(-1)">&lt;</span>
               <span @click="changeMonth(-1)">&lt;&lt;</span>
@@ -27,7 +58,7 @@
               </span>
           </div>
           <div class="panel-footer">
-              今日
+              <a>此刻</a><button>确定</button>
           </div>
       </div>
   </div>
@@ -66,10 +97,19 @@ export default {
             }
         }
     },
+    filters: {
+        format (value) {
+            return value < 10 ? '0' + value : '' + value
+        }
+    },
     computed: {
         formatDate () {
-            const { year, month, day } = utils.getYearMonthDay(this.value)
-            return `${year}-${month + 1}-${day}`
+            const { year, month, day } = utils.getDatePanel(this.value)
+            return `${year}-${utils.fomatLt10(month + 1)}-${utils.fomatLt10(day)}`
+        },
+        formatTime () {
+            const { hour, minute, second} = utils.getDatePanel(this.value)
+            return `${utils.fomatLt10(hour)}:${utils.fomatLt10(minute)}:${utils.fomatLt10(second)}`
         },
         visibleDays () {
             const { year, month } = this.time // 当前选择的年月
@@ -84,7 +124,7 @@ export default {
         }
     },
     data () {
-        const time = utils.getYearMonthDay(this.value)
+        const time = utils.getDatePanel(this.value)
         return {
             isOpend: false,
             time
@@ -103,40 +143,44 @@ export default {
         },
         isCurrentMonth (row, col) {
             const d = this.visibleDays[(row - 1) * 7 + col - 1]
-            const { year, month } = utils.getYearMonthDay(d)
+            const { year, month } = utils.getDatePanel(d)
             return year === this.time.year && month === this.time.month
         },
         isSelected (row, col) {
             const d = this.visibleDays[(row - 1) * 7 + col - 1]
-            const { year, month, day } = utils.getYearMonthDay(d)
+            const { year, month, day } = utils.getDatePanel(d)
             return year === this.time.year && month === this.time.month && day === this.time.day   
         },
         isCurrentDay (row, col) {
             const d = this.visibleDays[(row - 1) * 7 + col - 1]
-            const { year, month, day } = utils.getYearMonthDay(d)
+            const { year, month, day } = utils.getDatePanel(d)
             const { 
                 year: currentYear, 
                 month: currentMonth, 
                 day: currentDay 
-            } = utils.getYearMonthDay(new Date())
+            } = utils.getDatePanel(new Date())
 
             return year === currentYear && month === currentMonth && day === currentDay
         },
         handleSelect (row, col) {
             const d = this.visibleDays[(row - 1) * 7 + col - 1]
+            const { hour, minute, second } = utils.getDatePanel(new Date())
+            d.setHours(hour)
+            d.setMinutes(minute)
+            d.setSeconds(second)
             this.$emit('input', d)
-            this.time = utils.getYearMonthDay(d)
+            this.time = utils.getDatePanel(d)
             this.isOpend = false
         },
         changeMonth (n) {
-            const d = utils.getDate(this.time.year, this.time.month, this.time.day)
+            const d = utils.getDate(this.time.year, this.time.month, this.time.date)
             d.setMonth(d.getMonth() + n)
-            this.time = utils.getYearMonthDay(d)
+            this.time = utils.getDatePanel(d)
         },
         changeYear (n) {
-            const d = utils.getDate(this.time.year, this.time.month, this.time.day)
+            const d = utils.getDate(this.time.year, this.time.month, this.time.date)
             d.setFullYear(d.getFullYear() + n)
-            this.time = utils.getYearMonthDay(d)
+            this.time = utils.getDatePanel(d)
         }
     }
 }
@@ -149,6 +193,9 @@ export default {
 * {
     margin: 0;
     padding: 0;
+}
+ul {
+    list-style: none;
 }
 .date-picker-wrapper {
     position: relative;
@@ -166,6 +213,43 @@ export default {
             border: 1px solid @primary; 
         }
     } 
+    .date-picker-select {
+        display: flex;
+        justify-content: space-between;
+        input {
+            width: 100px;
+            text-indent: 5px;
+        }
+        .select-time {
+            position: relative;
+            .select-time-panel {
+                width: 196px;
+                position: absolute;
+                top: 38px;
+                left: 0;
+                background-color: #fff;
+                z-index: 100;
+                height: 224px;
+                padding: 12px 0;
+                overflow: hidden;
+            }
+            .hour-list,
+            .minute-list,
+            .second-list {
+                float: left;
+                width: 33.33%;
+                height: 100%;
+                text-align: center;
+                overflow: scroll;
+                &::-webkit-scrollbar {
+                    display: none;
+                }
+                li {
+                    cursor: pointer;
+                }
+            }
+        }
+    }
     .panel {
         position: absolute;
         z-index: 3;
@@ -205,7 +289,14 @@ export default {
             }
         }
         .panel-footer {
-            text-align: center;
+           display: flex;
+           justify-content: flex-end;
+           button {
+               margin: 0 20px
+           }
+           a {
+               cursor: pointer;
+           }
         }
     }   
 }
