@@ -1,19 +1,16 @@
 <template>
   <div class="app">
-     <!-- <date-picker v-model="value"></date-picker> -->
-     <calendar v-model="value"/>
+     <date-picker v-model="value"></date-picker>
      <span>{{ value.toLocaleString() }}</span>
      <div>hello world</div>
   </div>
 </template>
 
 <script>
-// import DatePicker from './date-picker'
-import Calendar from './calendar.vue'
+import DatePicker from './date-picker'
 export default {
     components: {
-        // DatePicker,
-        Calendar
+        DatePicker
     },
     data () {
         return {

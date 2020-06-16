@@ -1,12 +1,12 @@
 <template>
-  <div class="calendar-wrapper" v-if="isOpen">
+  <div class="calendar-wrapper">
       <div class="calendar-header">
         <div class="calendar-actions">
             <div>
                 <a @click="handleYearMonthChange('year', -1)">&lt;</a>
                 <a @click="handleYearMonthChange('month', -1)">&lt;&lt;</a>
             </div>
-            <div>{{ time.year }}年{{ time.month + 1 }}月</div>
+            <div class="title"><span>{{ time.year }}&nbsp;年</span><span>{{ time.month + 1 }}&nbsp;月</span></div>
             <div>
                 <a @click="handleYearMonthChange('month', 1)">&gt;&gt;</a>
                 <a @click="handleYearMonthChange('year', 1)">&gt;</a>
@@ -39,9 +39,7 @@
             </span>
           </div>
       </div>
-      <div class="calendar-footer">
-          今日
-      </div>
+      <slot name="footer"></slot>
   </div>
 </template>
 
@@ -53,10 +51,6 @@ export default {
         value: {
             type: Date,
             default: () => {}
-        },
-        isOpen: {
-            type: Boolean,
-            default: true
         }
     },
     data () {
@@ -147,41 +141,59 @@ export default {
         color: #CDD0D4;
         text-decoration: none;
     }
-    .calendar-wrapper {
-        box-shadow:0px 2px 6px 0px rgba(42,54,74,0.12);
-        border-radius:4px;
-        padding: 20px;
-    }
     .calendar-actions {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        height: 40px;
+        font-size: 12px;
+        font-weight: 500;
+        margin-bottom: 8px;
         & > div > a {
             cursor: pointer;
             padding: 10px;
+        }
+        .title {
+            span:first-child {
+                margin-right: 6px;
+            }
         }
     }
     .calendar-weekdays {
         display: flex;
         align-items: center;
-        border-bottom: 1px solid #EBECEE;
-        height: 40px;
+        height: 32px;
+        padding: 0 20px;
+        font-size: 12px;
+        font-weight: 500;
         & > span {
             flex: 1;
-            text-align: center;
+            margin-right: 13px;
+            &:last-child {
+                margin-right: 0;
+            }
         }
     }
     .calendar-body {
-        padding: 10px 0;
+        padding: 12px 20px;
+        border-bottom: 1px solid #EBECEE;
         .calendar-date-row {
             display: flex;
+            margin-bottom: 8px;
             .calendar-date-col {
                 flex: 1;
                 color: #2A364A;
                 text-align: center;
-                height: 100px;
-                line-height: 100px;
+                width: 24px;
+                height: 24px;
+                line-height: 24px;
+                margin: 4px 13px 0 0;
+                font-size: 12px;
+                font-weight: 500;
                 cursor: pointer;
+                &:last-child {
+                    margin-right: 0;
+                }
                 &.not-current-month {
                     color: #CDD0D4;
                 }
@@ -196,11 +208,5 @@ export default {
                 }
             }
         }
-    }
-    .calendar-footer {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 40px;
     }
 </style>
